@@ -21,6 +21,8 @@ jobs:
       - package-android
       - package-qnx
       - package-apple-universal
+      - package-none
+      - package-barebone-agent
       - assemble-ios-assets
       - assemble-tvos-assets
     permissions:
@@ -28,7 +30,7 @@ jobs:
       id-token: write
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Set up environment
@@ -46,48 +48,48 @@ jobs:
           sudo apt-get install -y reprepro
           sudo npm install -g cloudflare-cli@5.0.5
       - name: Download release assets
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: release-asset-*
           merge-multiple: true
           path: build/release-assets/
       - name: Download Node-API prebuilds for Windows/x86_64
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-node-windows-x86_64
           path: build/release-assets/
       - name: Download Node-API prebuilds for Windows/arm64
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-node-windows-arm64
           path: build/release-assets/
       - name: Download Node-API prebuilds for macOS/x86_64
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-node-macos-x86_64
           path: build/release-assets/
       - name: Download Node-API prebuilds for macOS/arm64
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-node-macos-arm64
           path: build/release-assets/
       - name: Download Node-API prebuilds for Linux/x86
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-node-linux-x86
           path: build/release-assets/
       - name: Download Node-API prebuilds for Linux/x86_64
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-node-linux-x86_64
           path: build/release-assets/
       - name: Download Node-API prebuilds for Linux/armhf
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-node-linux-armhf
           path: build/release-assets/
       - name: Download Node-API prebuilds for Linux/arm64
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-node-linux-arm64
           path: build/release-assets/
@@ -152,7 +154,7 @@ jobs:
       id-token: write
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Set up environment
@@ -190,7 +192,7 @@ jobs:
     needs: frida-ios
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up environment
         uses: ./.github/actions/setup-macos-env
         with:
@@ -202,7 +204,7 @@ jobs:
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Download universal frida-server for iOS/arm64(e)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-server-ios-arm64e
           path: ios-arm64e/
@@ -218,7 +220,7 @@ jobs:
               frida-server-arm64 \
               frida-server-arm64e
       - name: Download universal frida-agent for iOS/arm64(e)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-agent-ios-arm64e
           path: ios-arm64e/
@@ -230,7 +232,7 @@ jobs:
           mv frida-server-ios-universal ios-assets/usr/bin/frida-server
           mv ios-arm64e/frida-agent.dylib ios-assets/usr/lib/frida-1.0/frida-agent.dylib
       - name: Upload iOS assets
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ios-assets
           path: ios-assets/*
@@ -240,7 +242,7 @@ jobs:
     needs: frida-tvos
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up environment
         uses: ./.github/actions/setup-macos-env
         with:
@@ -252,14 +254,14 @@ jobs:
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Download frida-server for tvOS/arm64
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-server-tvos-arm64
           path: tvos-arm64/
       - name: Prepare frida-server for tvOS/arm64
         run: codesign -f -s "-" --preserve-metadata=entitlements tvos-arm64/frida-server
       - name: Download frida-agent for tvOS/arm64
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-agent-tvos-arm64
           path: tvos-arm64/
@@ -271,7 +273,7 @@ jobs:
           mv tvos-arm64/frida-server tvos-assets/usr/bin/frida-server
           mv tvos-arm64/frida-agent.dylib tvos-assets/usr/lib/frida-1.0/frida-agent.dylib
       - name: Upload tvOS assets
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: tvos-assets
           path: tvos-assets/*
@@ -282,7 +284,7 @@ jobs:
     needs: [frida-macos, frida-ios, frida-watchos, frida-tvos]
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up environment
         uses: ./.github/actions/setup-macos-env
         with:
@@ -294,12 +296,12 @@ jobs:
           cloudflare-email: ${{ secrets.CF_EMAIL }}
           cloudflare-token: ${{ secrets.CF_TOKEN }}
       - name: Download frida-gadget for macOS/x86_64
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-gadget-macos-x86_64
           path: macos-x86_64/
       - name: Download frida-gadget for macOS/arm64(e)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-gadget-macos-arm64e
           path: macos-arm64e/
@@ -318,12 +320,12 @@ jobs:
       - name: Compress universal frida-gadget for macOS
         run: xz -T 0 frida-gadget-macos-universal.dylib
       - name: Upload universal frida-gadget for macOS
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-asset-frida-gadget-macos-universal
           path: frida-gadget-macos-universal.dylib.xz
       - name: Download frida-gadget for iOS/arm64(e)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-gadget-ios-arm64e
           path: ios-arm64e/
@@ -341,22 +343,22 @@ jobs:
           gzip -k frida-gadget-ios-universal.dylib
           xz -T 0 frida-gadget-ios-universal.dylib
       - name: Upload universal frida-gadget for iOS (gz)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-asset-frida-gadget-ios-universal-gz
           path: frida-gadget-ios-universal.dylib.gz
       - name: Upload universal frida-gadget for iOS (xz)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-asset-frida-gadget-ios-universal-xz
           path: frida-gadget-ios-universal.dylib.xz
       - name: Download frida-gadget for iOS/x86_64-simulator
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-gadget-ios-x86_64-simulator
           path: ios-x86_64-simulator/
       - name: Download frida-gadget for iOS/arm64-simulator
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-gadget-ios-arm64-simulator
           path: ios-arm64-simulator/
@@ -375,17 +377,17 @@ jobs:
       - name: Compress universal frida-gadget for iOS Simulator
         run: xz -T 0 frida-gadget-ios-simulator-universal.dylib
       - name: Upload universal frida-gadget for iOS Simulator
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-asset-frida-gadget-ios-simulator-universal
           path: frida-gadget-ios-simulator-universal.dylib.xz
       - name: Download frida-gadget for watchOS/arm64
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-gadget-watchos-arm64
           path: watchos-arm64/
       - name: Download frida-gadget for watchOS/arm64-simulator
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-gadget-watchos-arm64-simulator
           path: watchos-arm64-simulator/
@@ -402,22 +404,22 @@ jobs:
             xz -T 0 frida-gadget-watchos-$arch.dylib
           done
       - name: Upload frida-gadget for watchOS/arm64
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-asset-frida-gadget-watchos-arm64
           path: frida-gadget-watchos-arm64.dylib.xz
       - name: Upload frida-gadget for watchOS/arm64-simulator
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-asset-frida-gadget-watchos-arm64-simulator
           path: frida-gadget-watchos-arm64-simulator.dylib.xz
       - name: Download frida-gadget for tvOS/arm64
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-gadget-tvos-arm64
           path: tvos-arm64/
       - name: Download frida-gadget for tvOS/arm64-simulator
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-gadget-tvos-arm64-simulator
           path: tvos-arm64-simulator/
@@ -434,12 +436,12 @@ jobs:
             xz -T 0 frida-gadget-tvos-$arch.dylib
           done
       - name: Upload frida-gadget for tvOS/arm64
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-asset-frida-gadget-tvos-arm64
           path: frida-gadget-tvos-arm64.dylib.xz
       - name: Upload frida-gadget for tvOS/arm64-simulator
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-asset-frida-gadget-tvos-arm64-simulator
           path: frida-gadget-tvos-arm64-simulator.dylib.xz
@@ -453,7 +455,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
@@ -502,7 +504,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-sfx
         with:
@@ -525,7 +527,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
@@ -570,7 +572,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
@@ -614,7 +616,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
@@ -642,7 +644,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
@@ -665,7 +667,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
@@ -688,7 +690,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
@@ -727,7 +729,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Package Gum devkit
         uses: ./.github/actions/package-artifact-files-as-tarball
         with:
@@ -757,6 +759,49 @@ jobs:
         with:
           name: frida-inject-qnx-${{ matrix.arch }}
 
+  package-none:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: frida-gum-none
+    strategy:
+      matrix:
+        machine:
+          - none-x86-softfloat_nopic
+          - none-x86-softfloat_pic
+          - none-x86_64-softfloat_nopic
+          - none-x86_64-softfloat_pic
+          - none-x86_64-softfloat_pic_msabi
+          - none-arm64-softfloat_nopic
+          - none-arm64-softfloat_pic
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+      - name: Package Gum devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-gum-devkit-${{ matrix.machine }}
+      - name: Package GumJS devkit
+        uses: ./.github/actions/package-artifact-files-as-tarball
+        with:
+          name: frida-gumjs-devkit-${{ matrix.machine }}
+
+  package-barebone-agent:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: frida-barebone-agent-blob
+    strategy:
+      matrix:
+        flavor: [win9x-x86, winnt-x86, winnt-x86_64, xnu-arm64]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+      - name: Package barebone agent
+        uses: ./.github/actions/package-artifact-file
+        with:
+          name: frida-barebone-agent-${{ matrix.flavor }}
+
   frida-windows-intel:
     needs: sdk-windows
     strategy:
@@ -768,7 +813,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Set up environment
@@ -821,7 +866,7 @@ jobs:
         run: .\make install
       - name: Upload components needed for emulation on arm64
         if: matrix.arch == 'x86_64'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-core-emulation-windows
           path: |
@@ -830,44 +875,44 @@ jobs:
             build/subprojects/frida-core/compat/frida-helper.exe
             build/subprojects/frida-core/compat/frida-agent.dll
       - name: Upload Gum devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gum-devkit-windows-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gum/
       - name: Upload GumJS devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gumjs-devkit-windows-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gumjs/
       - name: Upload Core devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-core-devkit-windows-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/core/
       - name: Upload frida-server
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-server-windows-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/bin/frida-server.exe
       - name: Upload frida-portal
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-portal-windows-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/bin/frida-portal.exe
       - name: Upload frida-inject
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-inject-windows-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/bin/frida-inject.exe
       - name: Upload 32-bit frida-gadget
         if: matrix.arch != 'x86_64'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gadget-windows-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/x86/frida-gadget.dll
       - name: Upload 64-bit frida-gadget
         if: matrix.arch == 'x86_64'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gadget-windows-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/x86_64/frida-gadget.dll
@@ -877,7 +922,7 @@ jobs:
           cd subprojects\frida-python
           pip wheel -w "$Env:FRIDA_PREFIX\wheels" --no-deps .
       - name: Upload Python bindings
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-python-windows-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/wheels/*.whl
@@ -910,7 +955,7 @@ jobs:
           Copy-Item .\build\*.tar.gz -Destination $installdir
       - name: Upload Node.js bindings
         if: matrix.arch == 'x86_64'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-node-windows-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/prebuilds/*.tar.gz
@@ -927,13 +972,13 @@ jobs:
           "-Dfrida-core:compiler_backend=disabled"
           && .\make install
       - name: Upload .NET bindings
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-clr-windows-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/bin/Frida.dll
       - name: Upload QML bindings
         if: matrix.arch == 'x86_64'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-qml-windows-${{ matrix.arch }}
           path: |
@@ -946,7 +991,7 @@ jobs:
     runs-on: windows-11-arm
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Set up environment
@@ -971,7 +1016,7 @@ jobs:
           go-version-file: ${{ env.FRIDA_COMPILER_MOD }}
           cache-dependency-path: ${{ env.FRIDA_COMPILER_MOD }}
       - name: Download emulation components
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frida-core-emulation-windows
           path: emulation/
@@ -1005,37 +1050,37 @@ jobs:
       - name: Install
         run: .\make install
       - name: Upload Gum devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gum-devkit-windows-arm64
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gum/
       - name: Upload GumJS devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gumjs-devkit-windows-arm64
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gumjs/
       - name: Upload Core devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-core-devkit-windows-arm64
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/core/
       - name: Upload frida-server
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-server-windows-arm64
           path: ${{ env.FRIDA_PREFIX }}/bin/frida-server.exe
       - name: Upload frida-portal
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-portal-windows-arm64
           path: ${{ env.FRIDA_PREFIX }}/bin/frida-portal.exe
       - name: Upload frida-inject
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-inject-windows-arm64
           path: ${{ env.FRIDA_PREFIX }}/bin/frida-inject.exe
       - name: Upload frida-gadget
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gadget-windows-arm64
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/arm64/frida-gadget.dll
@@ -1045,7 +1090,7 @@ jobs:
           cd subprojects\frida-python
           pip wheel -w "$Env:FRIDA_PREFIX\wheels" --no-deps .
       - name: Upload Python bindings
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-python-windows-arm64
           path: ${{ env.FRIDA_PREFIX }}/wheels/*.whl
@@ -1076,7 +1121,7 @@ jobs:
           New-Item -ItemType Directory -Path $installdir
           Copy-Item .\build\*.tar.gz -Destination $installdir
       - name: Upload Node.js bindings
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-node-windows-arm64
           path: ${{ env.FRIDA_PREFIX }}/prebuilds/*.tar.gz
@@ -1090,7 +1135,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Set up environment
@@ -1138,44 +1183,44 @@ jobs:
       - name: Install
         run: make install
       - name: Upload Gum devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gum-devkit-macos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gum/
       - name: Upload gum-graft
         if: matrix.arch != 'arm64e'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: gum-graft-macos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/bin/gum-graft
       - name: Upload GumJS devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gumjs-devkit-macos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gumjs/
       - name: Upload Core devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-core-devkit-macos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/core/
       - name: Upload frida-server
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-server-macos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/bin/frida-server
       - name: Upload frida-portal
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-portal-macos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/bin/frida-portal
       - name: Upload frida-inject
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-inject-macos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/bin/frida-inject
       - name: Upload frida-gadget
         if: matrix.arch != 'arm64'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gadget-macos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/frida-gadget.dylib
@@ -1194,7 +1239,7 @@ jobs:
           cd subprojects/frida-python
           pip wheel -w "$FRIDA_PREFIX/wheels" --no-deps .
       - name: Upload Python bindings
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-python-macos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/wheels/*.whl
@@ -1216,13 +1261,13 @@ jobs:
         shell: zsh {0}
       - name: Upload Node.js bindings
         if: matrix.arch != 'arm64e'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-node-macos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/prebuilds/*.tar.gz
       - name: Upload QML bindings
         if: matrix.arch != 'arm64e'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-qml-macos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/qml/
@@ -1237,7 +1282,7 @@ jobs:
     container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Set up environment
@@ -1291,44 +1336,44 @@ jobs:
       - name: Install
         run: make install
       - name: Upload Gum devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gum-devkit-linux-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gum/
       - name: Upload GumJS devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gumjs-devkit-linux-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gumjs/
       - name: Upload Core devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-core-devkit-linux-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/core/
       - name: Upload frida-server
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-server-linux-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/bin/frida-server
       - name: Upload frida-portal
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-portal-linux-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/bin/frida-portal
       - name: Upload frida-inject
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-inject-linux-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/bin/frida-inject
       - name: Upload 32-bit frida-gadget
         if: ${{ !contains(matrix.arch, '64') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gadget-linux-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/32/frida-gadget.so
       - name: Upload 64-bit frida-gadget
         if: ${{ contains(matrix.arch, '64') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gadget-linux-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/64/frida-gadget.so
@@ -1373,7 +1418,7 @@ jobs:
           done
         shell: bash
       - name: Upload Python bindings
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-python-linux-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/wheels/*.whl
@@ -1395,13 +1440,13 @@ jobs:
         shell: bash
       - name: Upload Node.js bindings
         if: ${{ !(startsWith(matrix.arch, 'mips') || endsWith(matrix.arch, '-musl') || matrix.arch == 'armbe8' || matrix.arch == 'arm64be') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-node-linux-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/prebuilds/*.tar.gz
       - name: Upload QML bindings
         if: matrix.arch == 'x86_64'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-qml-linux-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/qml/
@@ -1417,7 +1462,7 @@ jobs:
       XCODE11: /Applications/Xcode_11.7.app
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Set up environment
@@ -1453,53 +1498,53 @@ jobs:
       - name: Install
         run: DESTDIR="$FRIDA_PREFIX" make install
       - name: Upload Gum devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gum-devkit-ios-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/devkits/gum/
       - name: Upload GumJS devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gumjs-devkit-ios-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/devkits/gumjs/
       - name: Upload Core devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-core-devkit-ios-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/devkits/core/
       - name: Upload frida-server
         if: ${{ matrix.arch != 'arm64' && !endsWith(matrix.arch, '-simulator') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-server-ios-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/usr/bin/frida-server
       - name: Upload frida-portal
         if: ${{ !endsWith(matrix.arch, '-simulator') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-portal-ios-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/usr/bin/frida-portal
       - name: Upload frida-inject
         if: ${{ !endsWith(matrix.arch, '-simulator') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-inject-ios-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/usr/bin/frida-inject
       - name: Upload frida-helper
         if: ${{ matrix.arch != 'arm64' && !endsWith(matrix.arch, '-simulator') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-helper-ios-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/frida-helper
       - name: Upload frida-agent
         if: ${{ matrix.arch != 'arm64' && !endsWith(matrix.arch, '-simulator') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-agent-ios-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/frida-agent.dylib
       - name: Upload frida-gadget
         if: matrix.arch != 'arm64'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gadget-ios-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/frida-gadget.dylib
@@ -1513,7 +1558,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Set up environment
@@ -1539,22 +1584,22 @@ jobs:
       - name: Install
         run: make install
       - name: Upload Gum devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gum-devkit-watchos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gum/
       - name: Upload GumJS devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gumjs-devkit-watchos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gumjs/
       - name: Upload Core devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-core-devkit-watchos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/core/
       - name: Upload frida-gadget
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gadget-watchos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/frida-gadget.dylib
@@ -1568,7 +1613,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Set up environment
@@ -1598,52 +1643,52 @@ jobs:
       - name: Install
         run: DESTDIR="$FRIDA_PREFIX" make install
       - name: Upload Gum devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gum-devkit-tvos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/devkits/gum/
       - name: Upload GumJS devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gumjs-devkit-tvos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/devkits/gumjs/
       - name: Upload Core devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-core-devkit-tvos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/devkits/core/
       - name: Upload frida-server
         if: ${{ !endsWith(matrix.arch, '-simulator') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-server-tvos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/usr/bin/frida-server
       - name: Upload frida-portal
         if: ${{ !endsWith(matrix.arch, '-simulator') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-portal-tvos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/usr/bin/frida-portal
       - name: Upload frida-inject
         if: ${{ !endsWith(matrix.arch, '-simulator') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-inject-tvos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/usr/bin/frida-inject
       - name: Upload frida-helper
         if: ${{ !endsWith(matrix.arch, '-simulator') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-helper-tvos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/frida-helper
       - name: Upload frida-agent
         if: ${{ !endsWith(matrix.arch, '-simulator') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-agent-tvos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/frida-agent.dylib
       - name: Upload frida-gadget
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gadget-tvos-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/usr/lib/frida-1.0/frida-gadget.dylib
@@ -1657,7 +1702,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Set up environment
@@ -1697,44 +1742,44 @@ jobs:
       - name: Install
         run: make install
       - name: Upload Gum devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gum-devkit-android-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gum/
       - name: Upload GumJS devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gumjs-devkit-android-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gumjs/
       - name: Upload Core devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-core-devkit-android-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/core/
       - name: Upload frida-server
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-server-android-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/bin/frida-server
       - name: Upload frida-portal
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-portal-android-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/bin/frida-portal
       - name: Upload frida-inject
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-inject-android-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/bin/frida-inject
       - name: Upload 32-bit frida-gadget
         if: ${{ !contains(matrix.arch, '64') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gadget-android-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/32/frida-gadget.so
       - name: Upload 64-bit frida-gadget
         if: ${{ contains(matrix.arch, '64') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gadget-android-${{ matrix.arch }}
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/64/frida-gadget.so
@@ -1745,7 +1790,7 @@ jobs:
     container: ghcr.io/frida/qnx-tools:latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Set up environment
@@ -1773,40 +1818,268 @@ jobs:
       - name: Install
         run: make install
       - name: Upload Gum devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gum-devkit-qnx-armeabi
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gum/
       - name: Upload GumJS devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gumjs-devkit-qnx-armeabi
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gumjs/
       - name: Upload Core devkit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-core-devkit-qnx-armeabi
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/core/
       - name: Upload frida-server
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-server-qnx-armeabi
           path: ${{ env.FRIDA_PREFIX }}/bin/frida-server
       - name: Upload frida-portal
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-portal-qnx-armeabi
           path: ${{ env.FRIDA_PREFIX }}/bin/frida-portal
       - name: Upload frida-inject
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-inject-qnx-armeabi
           path: ${{ env.FRIDA_PREFIX }}/bin/frida-inject
       - name: Upload frida-gadget
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frida-gadget-qnx-armeabi
           path: ${{ env.FRIDA_PREFIX }}/lib/frida-1.0/32/frida-gadget.so
+
+  frida-gum-none:
+    needs: sdk-none
+    strategy:
+      matrix:
+        machine:
+          - none-x86-softfloat_nopic
+          - none-x86-softfloat_pic
+          - none-x86_64-softfloat_nopic
+          - none-x86_64-softfloat_pic
+          - none-x86_64-softfloat_pic_msabi
+          - none-arm64-softfloat_nopic
+          - none-arm64-softfloat_pic
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+      - name: Set up environment
+        uses: ./.github/actions/setup-linux-env
+        with:
+          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
+          cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Grab frida-gum
+        run: python tools/ensure-submodules.py frida-gum
+      - name: Set up C toolchain
+        uses: ./.github/actions/setup-llvm
+      - name: Configure Gum
+        working-directory: subprojects/frida-gum
+        run: >-
+          ./configure
+          --host=${{ matrix.machine }}
+          --enable-gumjs
+          --with-devkits=gum,gumjs
+          --with-devkit-symbol-scope=original
+        env:
+          CC: clang
+          CXX: clang++
+      - name: Compile
+        working-directory: subprojects/frida-gum
+        run: make
+      - name: Upload Gum devkit
+        uses: actions/upload-artifact@v7
+        with:
+          name: frida-gum-devkit-${{ matrix.machine }}
+          path: subprojects/frida-gum/build/gum/devkit/
+      - name: Upload GumJS devkit
+        uses: actions/upload-artifact@v7
+        with:
+          name: frida-gumjs-devkit-${{ matrix.machine }}
+          path: subprojects/frida-gum/build/bindings/gumjs/devkit/
+
+  frida-barebone-agent-blob:
+    needs: frida-gum-none
+    strategy:
+      matrix:
+        include:
+          - flavor: win9x
+            arch: x86
+            machine: none-x86-softfloat_pic
+            rust_target: i686-unknown-none-pic
+            target_flags: --target ./i686-unknown-none-pic.json -Z json-target-spec
+          - flavor: winnt
+            arch: x86
+            machine: none-x86-softfloat_pic
+            rust_target: i686-unknown-none-pic
+            target_flags: --target ./i686-unknown-none-pic.json -Z json-target-spec
+          - flavor: winnt
+            arch: x86_64
+            machine: none-x86_64-softfloat_pic_msabi
+            rust_target: x86_64-unknown-none-pic
+            target_flags: --target ./x86_64-unknown-none-pic.json -Z json-target-spec
+          - flavor: xnu
+            arch: arm64
+            machine: none-arm64-softfloat_nopic
+            rust_target: aarch64-unknown-none-softfloat
+            target_flags: --target aarch64-unknown-none-softfloat
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+      - name: Grab frida-core
+        run: python tools/ensure-submodules.py frida-core
+      - name: Set up C toolchain
+        uses: ./.github/actions/setup-llvm
+      - name: Fetch the SDK
+        run: |
+          releng/deps.py sync sdk ${{ matrix.machine }} "$SDK"
+          echo "CC=clang -I$SDK/include -I$SDK/include/glib-2.0 -I$SDK/lib/glib-2.0/include -I$SDK/include/capstone -I$SDK/include/json-glib-1.0" >> $GITHUB_ENV
+          echo "RUSTFLAGS=-L native=$SDK/lib" >> $GITHUB_ENV
+        env:
+          SDK: ${{ runner.workspace }}/sdk-${{ matrix.machine }}
+      - name: Set up Rust
+        run: rustup component add rust-src
+      - name: Download GumJS devkit
+        uses: actions/download-artifact@v8
+        with:
+          name: frida-gumjs-devkit-${{ matrix.machine }}
+          path: ${{ runner.workspace }}/gumjs-devkit
+      - name: Build agent
+        working-directory: subprojects/frida-core/src/barebone/agent
+        run: >-
+          cargo build --release
+          --features ${{ matrix.flavor }}
+          ${{ matrix.target_flags }}
+          -Z build-std=core,alloc,compiler_builtins
+          --target-dir target-${{ matrix.flavor }}
+        env:
+          RUSTC_BOOTSTRAP: 1
+          GUMJS_DEVKIT_DIR: ${{ runner.workspace }}/gumjs-devkit
+      - name: Upload agent
+        uses: actions/upload-artifact@v7
+        with:
+          name: frida-barebone-agent-${{ matrix.flavor }}-${{ matrix.arch }}
+          path: subprojects/frida-core/src/barebone/agent/target-${{ matrix.flavor }}/${{ matrix.rust_target }}/release/frida-barebone-agent
+
+  # The Makefile drives Cargo and the prelink itself, so the flags the agent needs live
+  # there rather than here. It stops at the prelinked object: a .ko is only loadable on
+  # the exact GKI build it was made for, since vermagic names it verbatim, so the
+  # kernel half is left to whoever has that kernel.
+  frida-barebone-agent-linux:
+    needs: frida-gum-none
+    strategy:
+      matrix:
+        include:
+          # Rust ships no freestanding 32-bit x86 target, so the agent spells one out
+          # and build-std compiles for it; there is nothing for rustup to add.
+          - arch: x86
+            bits: 32
+            kernel_arch: x86
+            rust_target: ''
+            toolprefix: ''
+            binutils: ''
+          - arch: x86_64
+            bits: 64
+            kernel_arch: x86
+            rust_target: x86_64-unknown-none
+            toolprefix: ''
+            binutils: ''
+          - arch: arm64
+            bits: 64
+            kernel_arch: arm64
+            rust_target: aarch64-unknown-none
+            toolprefix: aarch64-linux-gnu-
+            binutils: binutils-aarch64-linux-gnu
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+      - name: Grab frida-core
+        run: python tools/ensure-submodules.py frida-core
+      # The prelink reads nm's archive map, which only GNU nm emits.
+      - name: Set up binutils
+        if: matrix.binutils != ''
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ${{ matrix.binutils }}
+      - name: Set up C toolchain
+        uses: ./.github/actions/setup-llvm
+      - name: Fetch the SDK
+        run: releng/deps.py sync sdk none-${{ matrix.arch }}-softfloat_nopic $SDK_PREFIX
+        env:
+          SDK_PREFIX: ${{ runner.workspace }}/sdk-none-${{ matrix.arch }}-softfloat_nopic
+      - name: Set up Rust target
+        run: |
+          if [ -n "${{ matrix.rust_target }}" ]; then
+            rustup target add ${{ matrix.rust_target }}
+          fi
+          rustup component add rust-src
+      - name: Download GumJS devkit
+        uses: actions/download-artifact@v8
+        with:
+          name: frida-gumjs-devkit-none-${{ matrix.arch }}-softfloat_nopic
+          path: ${{ runner.workspace }}/gumjs-devkit
+      - name: Build agent
+        working-directory: subprojects/frida-core/src/barebone/agent/linux
+        run: >-
+          make frida-agent-prelinked.o.bin
+          ARCH=${{ matrix.kernel_arch }}
+          BITS=${{ matrix.bits }}
+          FRIDA_SDK=${{ runner.workspace }}/sdk-none-${{ matrix.arch }}-softfloat_nopic
+          AGENT_LD=${{ matrix.toolprefix }}ld
+          AGENT_AR=${{ matrix.toolprefix }}ar
+          AGENT_NM=${{ matrix.toolprefix }}nm
+          AGENT_OBJCOPY=${{ matrix.toolprefix }}objcopy
+        env:
+          GUMJS_DEVKIT_DIR: ${{ runner.workspace }}/gumjs-devkit
+      # Everything the module needs from the kernel goes through frida-kmod.c, and
+      # everything the kernel may see of us is the two entry points it calls. Both
+      # have broken before: a libc whose lock stubs collided with ours, and a devkit
+      # built against a different libc leaving its errno behind.
+      - name: Check the prelink
+        working-directory: subprojects/frida-core/src/barebone/agent/linux
+        run: |
+          undefined=$(${{ matrix.toolprefix }}nm --undefined-only frida-agent-prelinked.o.bin \
+            | awk '{ print $2 }' | grep -v '^frida_kmod_' || true)
+          if [ -n "$undefined" ]; then
+            echo "Undefined beyond the kmod glue:" $undefined
+            exit 1
+          fi
+          globals=$(${{ matrix.toolprefix }}nm --defined-only --extern-only frida-agent-prelinked.o.bin \
+            | awk '{ print $3 }' | sort | paste -sd' ')
+          if [ "$globals" != "$EXPECTED_GLOBALS" ]; then
+            echo "Global symbols beyond the entry points:" $globals
+            exit 1
+          fi
+        env:
+          EXPECTED_GLOBALS: >-
+            frida_agent_start frida_agent_stop
+            gum_interceptor_begin_transaction gum_interceptor_end_transaction
+            gum_interceptor_obtain gum_interceptor_replace
+            gum_interceptor_revert
+      - name: Check for notrack jumps
+        if: matrix.kernel_arch == 'x86'
+        working-directory: subprojects/frida-core/src/barebone/agent/linux
+        run: |
+          if objdump -d frida-agent-prelinked.o.bin | grep -q notrack; then
+            objdump -d frida-agent-prelinked.o.bin | grep -B 2 notrack
+            exit 1
+          fi
 
   toolchain-windows:
     strategy:
@@ -1816,7 +2089,7 @@ jobs:
     runs-on: ${{ matrix.arch == 'arm64' && 'windows-11-arm' || 'windows-latest' }}
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up environment
         uses: ./.github/actions/setup-windows-env
         with:
@@ -1837,7 +2110,7 @@ jobs:
     runs-on: ${{ matrix.arch == 'arm64' && 'windows-11-arm' || 'windows-latest' }}
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up environment
         uses: ./.github/actions/setup-windows-env
         with:
@@ -1856,7 +2129,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up environment
         uses: ./.github/actions/setup-macos-env
         with:
@@ -1879,7 +2152,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up environment
         uses: ./.github/actions/setup-macos-env
         with:
@@ -1902,7 +2175,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up environment
         uses: ./.github/actions/setup-macos-env
         with:
@@ -1924,7 +2197,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up environment
         uses: ./.github/actions/setup-macos-env
         with:
@@ -1946,7 +2219,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up environment
         uses: ./.github/actions/setup-macos-env
         with:
@@ -1968,7 +2241,7 @@ jobs:
     container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up environment
         uses: ./.github/actions/setup-linux-env
         with:
@@ -1989,7 +2262,7 @@ jobs:
     container: ghcr.io/frida/x-tools-linux-${{ matrix.arch }}:latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up environment
         uses: ./.github/actions/setup-linux-env
         with:
@@ -2016,7 +2289,7 @@ jobs:
     container: ghcr.io/frida/x-tools-linux-x86:latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up environment
         uses: ./.github/actions/setup-linux-env
         with:
@@ -2045,7 +2318,7 @@ jobs:
     container: ghcr.io/frida/x-tools-linux-x86_64:latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up environment
         uses: ./.github/actions/setup-linux-env
         with:
@@ -2063,3 +2336,45 @@ jobs:
         run: releng/deps.py roll sdk android-${{ matrix.arch }} --build=$XTOOLS_HOST --activate
         env:
           ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+
+  sdk-none:
+    needs: toolchain-linux
+    strategy:
+      matrix:
+        machine:
+          - none-x86-softfloat_nopic
+          - none-x86-softfloat_pic
+          - none-x86_64-softfloat_nopic
+          - none-x86_64-softfloat_pic
+          - none-x86_64-softfloat_pic_msabi
+          - none-arm64-softfloat_nopic
+          - none-arm64-softfloat_pic
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+      - name: Set up environment
+        uses: ./.github/actions/setup-linux-env
+        with:
+          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+          cloudflare-email: ${{ secrets.CF_EMAIL }}
+          cloudflare-token: ${{ secrets.CF_TOKEN }}
+      - name: Check whether the SDK is already published
+        id: sdk
+        run: echo "published=$(releng/deps.py published sdk ${{ matrix.machine }})" >> $GITHUB_OUTPUT
+      - name: Set up build prerequisites
+        if: steps.sdk.outputs.published == 'false'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gperf
+          sudo npm install -g cloudflare-cli@5.0.5
+      - name: Set up C toolchain
+        if: steps.sdk.outputs.published == 'false'
+        uses: ./.github/actions/setup-llvm
+      - name: Roll SDK
+        run: releng/deps.py roll sdk ${{ matrix.machine }} --activate
+        env:
+          CC: clang
+          CXX: clang++
